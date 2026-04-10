@@ -1,4 +1,7 @@
 const errorHandler = (err, req, res, next) => {
+  console.error('❌ Server Error:', err.message);
+  console.error('Stack Trace:', err.stack);
+
   let statusCode = res.statusCode === 200 ? 500 : res.statusCode;
   let message = err.message || 'Internal Server Error';
 
