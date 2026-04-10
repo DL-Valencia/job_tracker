@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
 // 3 minutes in milliseconds
-const IDLE_TIME = 3 * 60 * 1000;
+const IDLE_TIME = 1 * 60 * 1000;
 
 const IdleTimer = ({ children }) => {
   const { logout, isAuthenticated } = useAuth();
@@ -11,11 +11,11 @@ const IdleTimer = ({ children }) => {
 
   const resetTimer = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    
+
     if (isAuthenticated) {
       timeoutRef.current = setTimeout(() => {
         logout();
-        toast.error('Session expired due to 3 minutes of inactivity', {
+        toast.error('Session expired due to 1 minutes of inactivity', {
           id: 'idle-timeout', // Prevent duplicate toasts
           duration: 5000,
           icon: '⏳',
