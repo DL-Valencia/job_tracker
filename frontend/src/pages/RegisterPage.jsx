@@ -48,7 +48,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl text-2xl font-bold mb-4" style={{ background: 'linear-gradient(135deg,#6378ff,#a78bfa)' }}>J</div>
-          <h1 className="text-3xl font-bold gradient-text">JobTrackr</h1>
+          <h1 className="text-3xl font-bold gradient-text">JobTracker</h1>
           <p className="text-slate-500 text-sm mt-1">Create your free account</p>
         </div>
 

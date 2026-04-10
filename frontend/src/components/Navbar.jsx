@@ -37,7 +37,7 @@ export default function Navbar() {
               style={{ background: 'linear-gradient(135deg,#6378ff,#a78bfa)' }}>
               J
             </div>
-            <span className="font-bold text-lg gradient-text">JobTrackr</span>
+            <span className="font-bold text-lg gradient-text">JobTracker</span>
           </Link>
 
           {/* Nav Links */}
