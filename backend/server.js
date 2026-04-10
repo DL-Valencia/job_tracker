@@ -40,10 +40,15 @@ app.use('/api/admin', adminRoutes);
 
 // Health check route
 app.get('/api/health', (req, res) => {
+  const mongoose = require('mongoose');
+  const dbStatus = mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected';
+  
   res.status(200).json({
     success: true,
     message: 'Job Tracker API is running',
+    database: dbStatus,
     timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV,
   });
 });
 
