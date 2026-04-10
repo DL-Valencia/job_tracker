@@ -1,23 +1,21 @@
 import { useState, useEffect } from 'react';
-import { X, Briefcase, Building2, Link2, FileText, AlignLeft, Calendar, Tag } from 'lucide-react';
+import { X, Calendar, Globe, Briefcase, FileText, Link as LinkIcon } from 'lucide-react';
 import LoadingSpinner from './LoadingSpinner';
 
 const PLATFORMS = ['LinkedIn', 'Indeed', 'JobStreet', 'Others'];
 const STATUSES = ['Saved', 'Applied', 'Interview', 'Rejected', 'Offer'];
 
-const EMPTY_FORM = {
-  companyName: '',
-  jobTitle: '',
-  jobDescription: '',
-  jobLink: '',
-  platform: 'LinkedIn',
-  status: 'Applied',
-  dateApplied: new Date().toISOString().split('T')[0],
-  notes: '',
-};
-
 export default function ApplicationModal({ isOpen, onClose, onSubmit, editData, loading }) {
-  const [form, setForm] = useState(EMPTY_FORM);
+  const [form, setForm] = useState({
+    companyName: '',
+    jobTitle: '',
+    jobLink: '',
+    platform: 'LinkedIn',
+    status: 'Applied',
+    dateApplied: new Date().toISOString().split('T')[0],
+    notes: '',
+  });
+
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
@@ -25,231 +23,156 @@ export default function ApplicationModal({ isOpen, onClose, onSubmit, editData, 
       setForm({
         companyName: editData.companyName || '',
         jobTitle: editData.jobTitle || '',
-        jobDescription: editData.jobDescription || '',
         jobLink: editData.jobLink || '',
         platform: editData.platform || 'LinkedIn',
         status: editData.status || 'Applied',
-        dateApplied: editData.dateApplied
-          ? new Date(editData.dateApplied).toISOString().split('T')[0]
-          : new Date().toISOString().split('T')[0],
+        dateApplied: editData.dateApplied ? new Date(editData.dateApplied).toISOString().split('T')[0] : '',
         notes: editData.notes || '',
       });
     } else {
-      setForm(EMPTY_FORM);
+      setForm({
+        companyName: '',
+        jobTitle: '',
+        jobLink: '',
+        platform: 'LinkedIn',
+        status: 'Applied',
+        dateApplied: new Date().toISOString().split('T')[0],
+        notes: '',
+      });
     }
     setErrors({});
   }, [editData, isOpen]);
 
-  const validate = () => {
-    const errs = {};
-    if (!form.companyName.trim()) errs.companyName = 'Company name is required';
-    if (!form.jobTitle.trim()) errs.jobTitle = 'Job title is required';
-    if (!form.platform) errs.platform = 'Platform is required';
-    if (form.jobLink && !/^https?:\/\/.+/.test(form.jobLink))
-      errs.jobLink = 'Must be a valid URL (http/https)';
-    return errs;
-  };
+  if (!isOpen) return null;
 
-  const handleChange = (field, value) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: '' }));
+  const validate = () => {
+    const newErrors = {};
+    if (!form.companyName.trim()) newErrors.companyName = 'Company name is required';
+    if (!form.jobTitle.trim()) newErrors.jobTitle = 'Job title is required';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const errs = validate();
-    if (Object.keys(errs).length > 0) {
-      setErrors(errs);
-      return;
+    if (validate()) {
+      onSubmit(form);
     }
-    onSubmit(form);
   };
 
-  if (!isOpen) return null;
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div
-        className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl"
-        style={{
-          background: '#0f1629',
-          border: '1px solid rgba(99,120,255,0.2)',
-          boxShadow: '0 25px 60px rgba(0,0,0,0.5)',
-        }}
-      >
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)' }}>
+      <div className="w-full max-w-lg glass-card p-0 overflow-hidden" style={{ maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
         {/* Header */}
-        <div
-          className="flex items-center justify-between px-6 py-4"
-          style={{ borderBottom: '1px solid rgba(99,120,255,0.12)' }}
-        >
-          <div>
-            <h2 className="text-lg font-bold text-white">
-              {editData ? 'Edit Application' : 'Add Application'}
-            </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              {editData ? 'Update the application details below' : 'Fill in the details of your job application'}
-            </p>
-          </div>
-          <button
-            id="btn-close-modal"
-            onClick={onClose}
-            className="p-2 rounded-lg transition-colors"
-            style={{ color: '#64748b' }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = '#e2e8f0'; e.currentTarget.style.background = 'rgba(99,120,255,0.1)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = '#64748b'; e.currentTarget.style.background = 'transparent'; }}
-          >
-            <X size={18} />
+        <div className="px-6 py-4 border-b border-slate-800/50 flex items-center justify-between bg-indigo-500/5">
+          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            {editData ? 'Edit Application' : 'Add New Application'}
+          </h2>
+          <button onClick={onClose} className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 transition-colors">
+            <X size={20} />
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
-          {/* Row 1: Company + Job Title */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="form-label flex items-center gap-1.5">
-                <Building2 size={12} /> Company Name *
-              </label>
+        {/* Body */}
+        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto custom-scrollbar space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {/* Company */}
+            <div className="col-span-2 sm:col-span-1">
+              <label className="form-label flex items-center gap-1.5"><Briefcase size={14} /> Company Name</label>
               <input
-                id="field-companyName"
-                type="text"
-                className="form-input"
-                placeholder="e.g. Google, Microsoft"
+                name="companyName"
                 value={form.companyName}
-                onChange={(e) => handleChange('companyName', e.target.value)}
+                onChange={handleChange}
+                placeholder="Google, Meta, etc."
+                className="form-input"
+                id="input-company-name"
               />
               {errors.companyName && <p className="form-error">{errors.companyName}</p>}
             </div>
-            <div>
-              <label className="form-label flex items-center gap-1.5">
-                <Briefcase size={12} /> Job Title *
-              </label>
+
+            {/* Title */}
+            <div className="col-span-2 sm:col-span-1">
+              <label className="form-label flex items-center gap-1.5"><FileText size={14} /> Job Title</label>
               <input
-                id="field-jobTitle"
-                type="text"
-                className="form-input"
-                placeholder="e.g. Senior Frontend Developer"
+                name="jobTitle"
                 value={form.jobTitle}
-                onChange={(e) => handleChange('jobTitle', e.target.value)}
+                onChange={handleChange}
+                placeholder="Software Engineer"
+                className="form-input"
+                id="input-job-title"
               />
               {errors.jobTitle && <p className="form-error">{errors.jobTitle}</p>}
             </div>
-          </div>
 
-          {/* Row 2: Platform + Status */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="form-label flex items-center gap-1.5">
-                <Tag size={12} /> Platform *
-              </label>
-              <select
-                id="field-platform"
-                className="form-input"
-                value={form.platform}
-                onChange={(e) => handleChange('platform', e.target.value)}
-              >
-                {PLATFORMS.map((p) => <option key={p} value={p}>{p}</option>)}
-              </select>
-              {errors.platform && <p className="form-error">{errors.platform}</p>}
-            </div>
-            <div>
-              <label className="form-label flex items-center gap-1.5">
-                <Tag size={12} /> Status
-              </label>
-              <select
-                id="field-status"
-                className="form-input"
-                value={form.status}
-                onChange={(e) => handleChange('status', e.target.value)}
-              >
-                {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+            {/* Platform */}
+            <div className="col-span-1">
+              <label className="form-label flex items-center gap-1.5"><Globe size={14} /> Platform</label>
+              <select name="platform" value={form.platform} onChange={handleChange} className="form-input" id="select-platform">
+                {PLATFORMS.map(p => <option key={p} value={p}>{p}</option>)}
               </select>
             </div>
-          </div>
 
-          {/* Row 3: Date + Job Link */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="form-label flex items-center gap-1.5">
-                <Calendar size={12} /> Date Applied
-              </label>
+            {/* Status */}
+            <div className="col-span-1">
+              <label className="form-label flex items-center gap-1.5">🎯 Current Status</label>
+              <select name="status" value={form.status} onChange={handleChange} className="form-input" id="select-status">
+                {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+
+            {/* Date Applied */}
+            <div className="col-span-1">
+              <label className="form-label flex items-center gap-1.5"><Calendar size={14} /> Date Applied</label>
               <input
-                id="field-dateApplied"
                 type="date"
-                className="form-input"
+                name="dateApplied"
                 value={form.dateApplied}
-                onChange={(e) => handleChange('dateApplied', e.target.value)}
-                style={{ colorScheme: 'dark' }}
-              />
-            </div>
-            <div>
-              <label className="form-label flex items-center gap-1.5">
-                <Link2 size={12} /> Job Link
-              </label>
-              <input
-                id="field-jobLink"
-                type="url"
+                onChange={handleChange}
                 className="form-input"
-                placeholder="https://..."
-                value={form.jobLink}
-                onChange={(e) => handleChange('jobLink', e.target.value)}
+                id="input-date-applied"
               />
-              {errors.jobLink && <p className="form-error">{errors.jobLink}</p>}
             </div>
-          </div>
 
-          {/* Job Description */}
-          <div>
-            <label className="form-label flex items-center gap-1.5">
-              <AlignLeft size={12} /> Job Description
-            </label>
-            <textarea
-              id="field-jobDescription"
-              className="form-input"
-              rows={3}
-              placeholder="Paste the job description here..."
-              value={form.jobDescription}
-              onChange={(e) => handleChange('jobDescription', e.target.value)}
-              style={{ resize: 'vertical', minHeight: '80px' }}
-            />
+            {/* Job Link */}
+            <div className="col-span-2 sm:col-span-1">
+              <label className="form-label flex items-center gap-1.5"><LinkIcon size={14} /> Job Link (Optional)</label>
+              <input
+                name="jobLink"
+                value={form.jobLink}
+                onChange={handleChange}
+                placeholder="https://linkedin.com/jobs/..."
+                className="form-input"
+                id="input-job-link"
+              />
+            </div>
           </div>
 
           {/* Notes */}
           <div>
-            <label className="form-label flex items-center gap-1.5">
-              <FileText size={12} /> Notes <span className="opacity-50">(optional)</span>
-            </label>
+            <label className="form-label">Notes (Optional)</label>
             <textarea
-              id="field-notes"
-              className="form-input"
-              rows={2}
-              placeholder="Any personal notes, contact info, etc."
+              name="notes"
               value={form.notes}
-              onChange={(e) => handleChange('notes', e.target.value)}
-              style={{ resize: 'vertical', minHeight: '60px' }}
+              onChange={handleChange}
+              placeholder="Salary range, key requirements, etc."
+              rows={3}
+              className="form-input resize-none"
+              id="input-notes"
             />
           </div>
 
-          {/* Footer */}
-          <div
-            className="flex items-center justify-end gap-3 pt-2"
-            style={{ borderTop: '1px solid rgba(99,120,255,0.1)' }}
-          >
-            <button type="button" onClick={onClose} className="btn-ghost" id="btn-cancel-modal">
-              Cancel
+          {/* Footer Actions */}
+          <div className="pt-2 flex flex-col sm:flex-row gap-3">
+            <button type="submit" disabled={loading} className="btn-primary w-full py-3 justify-center text-base" id="btn-submit-application">
+              {loading ? <LoadingSpinner size="sm" /> : editData ? 'Update Application' : 'Add Application'}
             </button>
-            <button type="submit" className="btn-primary" disabled={loading} id="btn-submit-modal">
-              {loading ? (
-                <LoadingSpinner size="sm" />
-              ) : editData ? (
-                'Save Changes'
-              ) : (
-                'Add Application'
-              )}
+            <button type="button" onClick={onClose} className="btn-ghost w-full py-3 justify-center text-base" id="btn-close-modal">
+              Cancel
             </button>
           </div>
         </form>

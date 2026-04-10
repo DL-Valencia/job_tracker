@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
 import Navbar from '../components/Navbar';
 import LoadingSpinner from '../components/LoadingSpinner';
-import StatusBadge from '../components/StatusBadge';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { Users, BarChart3, Trash2, Shield, User as UserIcon, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -20,12 +19,13 @@ export default function AdminPage() {
     setLoading(true);
     try {
       const [usersRes, statsRes] = await Promise.all([
-        api.get('/admin/users'),
-        api.get('/admin/stats'),
+        api.get('admin/users'),
+        api.get('admin/stats'),
       ]);
-      setUsers(usersRes.data.data);
-      setStats(statsRes.data.data);
-    } catch {
+      setUsers(usersRes.data.data || []);
+      setStats(statsRes.data.data || null);
+    } catch (err) {
+      console.error('Admin Load Error:', err);
       toast.error('Failed to load admin data');
     } finally {
       setLoading(false);
@@ -40,7 +40,7 @@ export default function AdminPage() {
     const newRole = user.role === 'super_admin' ? 'user' : 'super_admin';
     setActionLoading(true);
     try {
-      await api.patch(`/admin/users/${user._id}/role`, { role: newRole });
+      await api.patch(`admin/users/${user._id}/role`, { role: newRole });
       toast.success(`Role updated for ${user.name}`);
       fetchData();
     } catch (err) {
@@ -58,7 +58,7 @@ export default function AdminPage() {
   const handleDelete = async () => {
     setActionLoading(true);
     try {
-      await api.delete(`/admin/users/${deleteTarget._id}`);
+      await api.delete(`admin/users/${deleteTarget._id}`);
       toast.success('User and all their data deleted');
       setConfirmOpen(false);
       fetchData();
@@ -227,27 +227,33 @@ export default function AdminPage() {
                 Application Status Distribution
               </h3>
               <div className="space-y-4">
-                {['Applied', 'Interview', 'Rejected', 'Offer', 'Saved'].map((status) => {
-                  const count = stats.statusBreakdown[status] || 0;
-                  const pct = stats.totalApplications > 0 ? (count / stats.totalApplications) * 100 : 0;
-                  return (
-                    <div key={status}>
-                      <div className="flex justify-between text-xs mb-1.5">
-                        <span className="text-slate-400">{status}</span>
-                        <span className="text-white font-bold">{count} ({Math.round(pct)}%)</span>
+                {stats?.statusBreakdown ? (
+                  ['Applied', 'Interview', 'Rejected', 'Offer', 'Saved'].map((status) => {
+                    const count = stats.statusBreakdown[status] || 0;
+                    const pct = stats.totalApplications > 0 ? (count / stats.totalApplications) * 100 : 0;
+                    return (
+                      <div key={status}>
+                        <div className="flex justify-between text-xs mb-1.5">
+                          <span className="text-slate-400">{status}</span>
+                          <span className="text-white font-bold">{count} ({Math.round(pct)}%)</span>
+                        </div>
+                        <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+                          <div
+                            className="h-full"
+                            style={{
+                              width: `${pct}%`,
+                              background: status === 'Offer' ? '#22c55e' : status === 'Rejected' ? '#ef4444' : '#6378ff'
+                            }}
+                          />
+                        </div>
                       </div>
-                      <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-                        <div
-                          className="h-full"
-                          style={{
-                            width: `${pct}%`,
-                            background: status === 'Offer' ? '#22c55e' : status === 'Rejected' ? '#ef4444' : '#6378ff'
-                          }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                ) : (
+                  <div className="py-10 text-center text-slate-500 text-sm">
+                    No analytics data available
+                  </div>
+                )}
               </div>
             </div>
 
