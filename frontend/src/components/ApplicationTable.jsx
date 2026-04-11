@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { Pencil, Trash2, ExternalLink, ChevronUp, ChevronDown } from 'lucide-react';
+import { Pencil, Trash2, ExternalLink, ChevronUp, ChevronDown, DollarSign, TrendingUp } from 'lucide-react';
 import StatusBadge from './StatusBadge';
 import LoadingSpinner from './LoadingSpinner';
 
@@ -35,9 +35,11 @@ export default function ApplicationTable({
   const cols = [
     { key: 'companyName', label: 'Company' },
     { key: 'jobTitle', label: 'Job Title' },
+    { key: 'askingSalary', label: 'Asking' },
+    { key: 'offeredSalaryRange', label: 'Offer Range' },
     { key: 'platform', label: 'Platform' },
     { key: 'status', label: 'Status' },
-    { key: 'dateApplied', label: 'Date Applied' },
+    { key: 'dateApplied', label: 'Applied' },
   ];
 
   if (loading) {
@@ -114,6 +116,12 @@ export default function ApplicationTable({
                       View posting <ExternalLink size={10} />
                     </a>
                   )}
+                </td>
+                <td className="px-5 py-4">
+                  <span className="text-emerald-400 font-medium">{app.askingSalary ? `${app.currency || '₱'} ${app.askingSalary}` : '—'}</span>
+                </td>
+                <td className="px-5 py-4">
+                  <span className="text-amber-400 font-medium">{app.offeredSalaryRange ? `${app.currency || '₱'} ${app.offeredSalaryRange}` : '—'}</span>
                 </td>
                 <td className="px-5 py-4">
                   <span className="flex items-center gap-1.5 text-slate-300 text-xs">

@@ -10,6 +10,7 @@ import { format } from 'date-fns';
 import { ArrowRight, Plus, TrendingUp } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ApplicationModal from '../components/ApplicationModal';
+import DashboardInsights from '../components/DashboardInsights';
 
 const STAT_CONFIG = [
   { key: 'total', label: 'Total Applications', icon: '📊', color: '#6378ff' },
@@ -30,7 +31,12 @@ export default function DashboardPage() {
   const fetchDashboard = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await applicationsAPI.getAll({ limit: 5, sort: '-createdAt' });
+      const today = new Date().toISOString().split('T')[0];
+      const res = await applicationsAPI.getAll({ 
+        limit: 10, 
+        sort: '-createdAt',
+        dateFrom: today 
+      });
       setData({
         applications: res.data.data,
         metrics: res.data.metrics,
@@ -105,6 +111,9 @@ export default function DashboardPage() {
               ))}
             </div>
 
+            {/* Application Data Insights */}
+            <DashboardInsights metrics={data.metrics} />
+
             {/* Success rate banner */}
             {data.metrics && data.metrics.total > 0 && (
               <div
@@ -129,10 +138,10 @@ export default function DashboardPage() {
               </div>
             )}
 
-            {/* Recent Applications */}
+            {/* Today's Applications */}
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-white">Recent Applications</h2>
+                <h2 className="text-lg font-semibold text-white">Today's Applications</h2>
                 <Link
                   to="/applications"
                   className="flex items-center gap-1 text-sm text-indigo-400 hover:text-indigo-300 transition-colors no-underline"

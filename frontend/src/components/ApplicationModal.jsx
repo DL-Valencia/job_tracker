@@ -1,9 +1,16 @@
 import { useState, useEffect } from 'react';
-import { X, Calendar, Globe, Briefcase, FileText, Link as LinkIcon } from 'lucide-react';
+import { X, Calendar, Globe, Briefcase, FileText, Link as LinkIcon, DollarSign, TrendingUp } from 'lucide-react';
 import LoadingSpinner from './LoadingSpinner';
 
 const PLATFORMS = ['LinkedIn', 'Indeed', 'JobStreet', 'Others'];
 const STATUSES = ['Saved', 'Applied', 'Interview', 'Rejected', 'Offer'];
+const CURRENCIES = [
+  { symbol: '₱', label: 'PHP - Philippine Peso' },
+  { symbol: '$', label: 'USD - US Dollar' },
+  { symbol: '€', label: 'EUR - Euro' },
+  { symbol: '£', label: 'GBP - British Pound' },
+  { symbol: '¥', label: 'JPY - Japanese Yen' },
+];
 
 export default function ApplicationModal({ isOpen, onClose, onSubmit, editData, loading }) {
   const [form, setForm] = useState({
@@ -14,6 +21,9 @@ export default function ApplicationModal({ isOpen, onClose, onSubmit, editData, 
     status: 'Applied',
     dateApplied: new Date().toISOString().split('T')[0],
     notes: '',
+    askingSalary: '',
+    offeredSalaryRange: '',
+    currency: '₱',
   });
 
   const [errors, setErrors] = useState({});
@@ -28,6 +38,9 @@ export default function ApplicationModal({ isOpen, onClose, onSubmit, editData, 
         status: editData.status || 'Applied',
         dateApplied: editData.dateApplied ? new Date(editData.dateApplied).toISOString().split('T')[0] : '',
         notes: editData.notes || '',
+        askingSalary: editData.askingSalary || '',
+        offeredSalaryRange: editData.offeredSalaryRange || '',
+        currency: editData.currency || '₱',
       });
     } else {
       setForm({
@@ -66,7 +79,7 @@ export default function ApplicationModal({ isOpen, onClose, onSubmit, editData, 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)' }}>
+    <div className="fixed inset-0 z-[1000] flex items-start justify-center p-4 overflow-y-auto" style={{ background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)' }}>
       <div className="w-full max-w-lg glass-card p-0 overflow-hidden" style={{ maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-800/50 flex items-center justify-between bg-indigo-500/5">
@@ -126,7 +139,7 @@ export default function ApplicationModal({ isOpen, onClose, onSubmit, editData, 
             </div>
 
             {/* Date Applied */}
-            <div className="col-span-1">
+            <div className="col-span-2 sm:col-span-1">
               <label className="form-label flex items-center gap-1.5"><Calendar size={14} /> Date Applied</label>
               <input
                 type="date"
@@ -138,8 +151,48 @@ export default function ApplicationModal({ isOpen, onClose, onSubmit, editData, 
               />
             </div>
 
-            {/* Job Link */}
+            {/* Currency Choice */}
             <div className="col-span-2 sm:col-span-1">
+              <label className="form-label flex items-center gap-1.5">💱 Currency</label>
+              <select name="currency" value={form.currency} onChange={handleChange} className="form-input" id="select-currency">
+                {CURRENCIES.map(c => <option key={c.symbol} value={c.symbol}>{c.label}</option>)}
+              </select>
+            </div>
+
+            {/* Asking Salary */}
+            <div className="col-span-2 sm:col-span-1">
+              <label className="form-label flex items-center gap-1.5"><DollarSign size={14} /> Asking Salary</label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">{form.currency}</span>
+                <input
+                  name="askingSalary"
+                  value={form.askingSalary}
+                  onChange={handleChange}
+                  placeholder="e.g. 100k, 5000"
+                  className="form-input pl-8"
+                  id="input-asking-salary"
+                />
+              </div>
+            </div>
+
+            {/* Offered Salary Range */}
+            <div className="col-span-2 sm:col-span-1">
+              <label className="form-label flex items-center gap-1.5"><TrendingUp size={14} /> Salary Range (Job)</label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">{form.currency}</span>
+                <input
+                  name="offeredSalaryRange"
+                  value={form.offeredSalaryRange}
+                  onChange={handleChange}
+                  placeholder="e.g. 80k-120k"
+                  className="form-input pl-8"
+                  id="input-offered-salary-range"
+                />
+              </div>
+            </div>
+
+            {/* Job Link */}
+            <div className="col-span-2">
               <label className="form-label flex items-center gap-1.5"><LinkIcon size={14} /> Job Link (Optional)</label>
               <input
                 name="jobLink"

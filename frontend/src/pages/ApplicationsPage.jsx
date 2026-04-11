@@ -128,13 +128,16 @@ export default function ApplicationsPage() {
   // ── CSV Export ─────────────────────────────────────────────────────────────
   const exportCSV = () => {
     if (applications.length === 0) { toast.error('No data to export'); return; }
-    const headers = ['Company', 'Job Title', 'Platform', 'Status', 'Date Applied', 'Job Link', 'Notes'];
+    const headers = ['Company', 'Job Title', 'Platform', 'Status', 'Date Applied', 'Currency', 'Asking Salary', 'Offered Salary', 'Job Link', 'Notes'];
     const rows = applications.map((a) => [
       `"${a.companyName}"`,
       `"${a.jobTitle}"`,
       a.platform,
       a.status,
       a.dateApplied ? new Date(a.dateApplied).toLocaleDateString() : '',
+      a.currency || '₱',
+      `"${(a.askingSalary || '').replace(/"/g, '""')}"`,
+      `"${(a.offeredSalaryRange || '').replace(/"/g, '""')}"`,
       a.jobLink || '',
       `"${(a.notes || '').replace(/"/g, '""')}"`,
     ]);

@@ -51,7 +51,19 @@ const applicationSchema = new mongoose.Schema(
     notes: {
       type: String,
       trim: true,
-      maxlength: [1000, 'Notes cannot exceed 1000 characters'],
+      maxlength: [10000, 'Notes cannot exceed 10000 characters'],
+    },
+    currency: {
+      type: String,
+      default: '₱',
+    },
+    askingSalary: {
+      type: String,
+      trim: true,
+    },
+    offeredSalaryRange: {
+      type: String,
+      trim: true,
     },
   },
   {

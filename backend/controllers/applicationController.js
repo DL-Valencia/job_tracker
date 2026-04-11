@@ -58,14 +58,25 @@ const getApplications = async (req, res, next) => {
     ]);
 
     // Dashboard metrics (aggregate for logged-in user)
-    const metrics = await Application.aggregate([
-      { $match: { userId: req.user._id } },
-      { $group: { _id: '$status', count: { $sum: 1 } } },
+    const [statusMetrics, platformMetrics] = await Promise.all([
+      Application.aggregate([
+        { $match: { userId: req.user._id } },
+        { $group: { _id: '$status', count: { $sum: 1 } } },
+      ]),
+      Application.aggregate([
+        { $match: { userId: req.user._id } },
+        { $group: { _id: '$platform', count: { $sum: 1 } } },
+      ]),
     ]);
 
     const metricMap = { Applied: 0, Interview: 0, Rejected: 0, Offer: 0, Saved: 0 };
-    metrics.forEach((m) => {
+    statusMetrics.forEach((m) => {
       metricMap[m._id] = m.count;
+    });
+
+    const platformMap = { LinkedIn: 0, Indeed: 0, JobStreet: 0, Others: 0 };
+    platformMetrics.forEach((m) => {
+      platformMap[m._id] = m.count;
     });
 
     res.status(200).json({
@@ -74,6 +85,7 @@ const getApplications = async (req, res, next) => {
       metrics: {
         total,
         ...metricMap,
+        platforms: platformMap,
       },
       pagination: {
         total,
